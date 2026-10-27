@@ -1,5 +1,6 @@
 package edu.temple.basicbrowser
 
+import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.webkit.WebView
@@ -21,16 +22,26 @@ class MainActivity : AppCompatActivity() {
         goButton = findViewById(R.id.goButton)
         webView = findViewById(R.id.webView)
 
-        goButton.setOnClickListener {
-            webView.loadUrl(urlEditText.text.toString())
-        }
-
         // Allow your browser to intercept hyperlink clicks
         webView.settings.javaScriptEnabled = true
-        webView.webViewClient = object: WebViewClient() {
+        webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
             }
+
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                url?.run {
+                    urlEditText.setText(this)
+                }
+            }
+        }
+
+        goButton.setOnClickListener {
+            webView.loadUrl(parseUrl(urlEditText.text.toString()))
         }
     }
+
+    fun parseUrl(url: String) = if (url.startsWith("https://")) url
+    else "https://${url}"
 }
